@@ -1,0 +1,37 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Laptop House\\source\\repos\\linklist\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{834615AD-9620-41B1-8F9E-5175C24AE63E}|linklist\\linklist.vcxproj|C:\\Users\\Laptop House\\source\\repos\\linklist\\linklist\\linklist.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{834615AD-9620-41B1-8F9E-5175C24AE63E}|linklist\\linklist.vcxproj|solutionrelative:linklist\\linklist.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "linklist.cpp",
+              "DocumentMoniker": "C:\\Users\\Laptop House\\source\\repos\\linklist\\linklist\\linklist.cpp",
+              "RelativeDocumentMoniker": "linklist\\linklist.cpp",
+              "ToolTip": "C:\\Users\\Laptop House\\source\\repos\\linklist\\linklist\\linklist.cpp*",
+              "RelativeToolTip": "linklist\\linklist.cpp*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-09-03T19:03:00.26Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
