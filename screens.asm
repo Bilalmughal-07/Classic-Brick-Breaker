@@ -544,10 +544,15 @@ HS_GOT_KEY:
     RET
 SHOW_HOME_SCREEN ENDP
 
+;==============================================================
+; SHOW_NAME_INPUT — collects up to 15 characters into playerName
+; Backspace deletes last char, Enter confirms and returns.
+;==============================================================
 SHOW_NAME_INPUT PROC
     MOV AL, 8
     CALL CLEAR_SCREEN
 
+    ; --- Top header bar (blue) ---
     MOV rectX, 0
     MOV rectY, 0
     MOV rectW, 320
@@ -555,6 +560,8 @@ SHOW_NAME_INPUT PROC
     MOV rectColor, 1
     CALL DRAW_RECT
 
+    ; --- Title "NAME INPUT" ---
+    ; N-A-M-E [space] I-N-P-U-T
     MOV CX, 7
     MOV DL, 14
     MOV BX, 115
@@ -569,7 +576,7 @@ SHOW_NAME_INPUT PROC
     ADD BX, 9
     MOV AL, 'E'
     CALL DRAW_CHAR
-    ADD BX, 6
+    ADD BX, 15            ; word break: end of "NAME"
     MOV AL, 'I'
     CALL DRAW_CHAR
     ADD BX, 9
@@ -585,9 +592,10 @@ SHOW_NAME_INPUT PROC
     MOV AL, 'T'
     CALL DRAW_CHAR
 
+    ; --- Prompt: "ENTER YOUR NAME:" ---
     MOV CX, 68
     MOV DL, 15
-    MOV BX, 83
+    MOV BX, 75
     MOV AL, 'E'
     CALL DRAW_CHAR
     ADD BX, 9
@@ -602,7 +610,7 @@ SHOW_NAME_INPUT PROC
     ADD BX, 9
     MOV AL, 'R'
     CALL DRAW_CHAR
-    ADD BX, 6
+    ADD BX, 15            ; word break: end of "ENTER"
     MOV AL, 'Y'
     CALL DRAW_CHAR
     ADD BX, 9
@@ -614,7 +622,7 @@ SHOW_NAME_INPUT PROC
     ADD BX, 9
     MOV AL, 'R'
     CALL DRAW_CHAR
-    ADD BX, 6
+    ADD BX, 15            ; word break: end of "YOUR"
     MOV AL, 'N'
     CALL DRAW_CHAR
     ADD BX, 9
@@ -630,6 +638,7 @@ SHOW_NAME_INPUT PROC
     MOV AL, ':'
     CALL DRAW_CHAR
 
+    ; --- Input box ---
     MOV rectX, 58
     MOV rectY, 83
     MOV rectW, 204
@@ -644,9 +653,10 @@ SHOW_NAME_INPUT PROC
     MOV rectColor, 0
     CALL DRAW_RECT
 
+    ; --- Hint: "MAX 15 CHARS" ---
     MOV CX, 115
     MOV DL, 7
-    MOV BX, 85
+    MOV BX, 110
     MOV AL, 'M'
     CALL DRAW_CHAR
     ADD BX, 9
@@ -655,13 +665,13 @@ SHOW_NAME_INPUT PROC
     ADD BX, 9
     MOV AL, 'X'
     CALL DRAW_CHAR
-    ADD BX, 6
+    ADD BX, 15            ; word break: end of "MAX"
     MOV AL, '1'
     CALL DRAW_CHAR
     ADD BX, 9
     MOV AL, '5'
     CALL DRAW_CHAR
-    ADD BX, 6
+    ADD BX, 15            ; word break: end of "15"
     MOV AL, 'C'
     CALL DRAW_CHAR
     ADD BX, 9
@@ -677,9 +687,10 @@ SHOW_NAME_INPUT PROC
     MOV AL, 'S'
     CALL DRAW_CHAR
 
-    MOV CX, 128
+    ; --- Hint: "PRESS ENTER TO CONFIRM" ---
+    MOV CX, 130
     MOV DL, 7
-    MOV BX, 85
+    MOV BX, 60
     MOV AL, 'P'
     CALL DRAW_CHAR
     ADD BX, 9
@@ -694,7 +705,7 @@ SHOW_NAME_INPUT PROC
     ADD BX, 9
     MOV AL, 'S'
     CALL DRAW_CHAR
-    ADD BX, 6
+    ADD BX, 15            ; word break: end of "PRESS"
     MOV AL, 'E'
     CALL DRAW_CHAR
     ADD BX, 9
@@ -709,13 +720,13 @@ SHOW_NAME_INPUT PROC
     ADD BX, 9
     MOV AL, 'R'
     CALL DRAW_CHAR
-    ADD BX, 6
+    ADD BX, 15            ; word break: end of "ENTER"
     MOV AL, 'T'
     CALL DRAW_CHAR
     ADD BX, 9
     MOV AL, 'O'
     CALL DRAW_CHAR
-    ADD BX, 6
+    ADD BX, 15            ; word break: end of "TO"
     MOV AL, 'C'
     CALL DRAW_CHAR
     ADD BX, 9
@@ -737,6 +748,7 @@ SHOW_NAME_INPUT PROC
     MOV AL, 'M'
     CALL DRAW_CHAR
 
+    ; --- Initialize buffer ---
     MOV nameLen, 0
     MOV CX, 16
     MOV SI, 0
@@ -745,6 +757,9 @@ NI_CLEAR:
     INC SI
     LOOP NI_CLEAR
 
+;-----------------------------------------------------------
+; INPUT LOOP — reads one key at a time
+;-----------------------------------------------------------
 NI_LOOP:
     MOV AH, 00h
     INT 16h
@@ -768,10 +783,11 @@ NI_LOOP:
     MOV playerName[SI], AL
     INC nameLen
 
+    ; Position next typed char inside box
     MOVZX BX, nameLen
     DEC BX
-    IMUL BX, 9
-    ADD BX, 63
+    IMUL BX, 9            ; 9 px per char (consistent with DRAW_CHAR width)
+    ADD BX, 63            ; left margin inside box
 
     MOV CX, 88
     MOV DL, 11
