@@ -27,16 +27,19 @@
     sEnter      DB 'ENTER YOUR NAME:',0
     sMax15      DB 'MAX 15 CHARS',0
     sConfirm    DB 'PRESS ENTER TO CONFIRM',0
+    sUpDown     DB 'UP/DOWN ENTER',0
     sStart      DB 'START GAME',0
     sInstr      DB 'INSTRUCTIONS',0
     sHighSc     DB 'HIGH SCORES',0
     sExit       DB 'EXIT',0
     sCtrl       DB 'CONTROLS',0
     sMove       DB '<-> OR A/D = MOVE PADDLE',0
+    sADinst     DB 'A / D OR ARROW = MOVE PADDLE',0
     sObj        DB 'OBJECTIVE',0
     sBreak      DB 'BREAK ALL BRICKS TO ADVANCE',0
-    sLivesH     DB 'LIVES',0
-    sLivesD     DB '3 LIVES, MISS BALL = LOSE 1',0
+    sLivesH     DB 'LIVES $ BALL',0
+    sLivesD     DB 'START WITH 3 LIVES',0
+    sMS         DB 'MISS BALL = LOSE 1',0
     sBonusH     DB 'BONUSES',0
     sSlow       DB 'SLOW BALL',0
     sExtra      DB 'EXTRA LIFE',0
@@ -50,11 +53,11 @@
     s0          DB '0',0
     s3          DB '3',0
     sPl         DB 'PL:',0
-    hsN1        DB 'ALI',0
-    hsN2        DB 'SARA',0
-    hsN3        DB 'USMAN',0
-    hsN4        DB 'AYESHA',0
-    hsN5        DB 'BILAL',0
+    hsN1        DB 'ESHAL FATIMA',0
+    hsN2        DB 'DANIYA JADOON',0
+    hsN3        DB 'MUNEEB BAIG',0
+    hsN4        DB 'RANA HANAN',0
+    hsN5        DB 'MUHAMMAD BILAL',0
     hsS1        DB '05000',0
     hsS2        DB '04200',0
     hsS3        DB '03800',0
@@ -425,92 +428,22 @@ HS_BRICK2_DONE:
     MOV rectColor, 0
     CALL DRAW_RECT
 
+    MOV SI, OFFSET sTitle
     MOV CX, 86
     MOV DL, 14
-
     MOV BX, 101
-    MOV AL, 'B'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'I'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'C'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'K'
-    CALL DRAW_CHAR
-    ADD BX, 14
-    MOV AL, 'B'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'A'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'K'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'R'
-    CALL DRAW_CHAR
+    CALL DRAW_STRING
 
+    MOV SI, OFFSET sSub
     MOV CX, 103
-    MOV DL, 7
-    MOV BX, 75
-    MOV AL, 'A'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'C'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'A'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'D'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 14
-    MOV AL, 'C'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'L'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'A'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'S'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'S'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'I'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'C'
-    CALL DRAW_CHAR
+    MOV DL, 14
+    MOV BX, 97
+    CALL DRAW_STRING
 
     ; --- Flashing "PRESS ANY KEY TO CONTINUE" ---
 HS_FLASH:
     MOV SI, OFFSET sPress
-    MOV BX, 43
+    MOV BX, 54
     MOV CX, 158
     MOV DL, 15
     CALL DRAW_STRING
@@ -561,82 +494,18 @@ SHOW_NAME_INPUT PROC
     CALL DRAW_RECT
 
     ; --- Title "NAME INPUT" ---
-    ; N-A-M-E [space] I-N-P-U-T
+    MOV SI, OFFSET sNameHdr
     MOV CX, 7
     MOV DL, 14
     MOV BX, 115
-    MOV AL, 'N'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'A'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'M'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 15            ; word break: end of "NAME"
-    MOV AL, 'I'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'N'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'P'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'U'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'T'
-    CALL DRAW_CHAR
+    CALL DRAW_STRING
 
     ; --- Prompt: "ENTER YOUR NAME:" ---
+    MOV SI, OFFSET sEnter
     MOV CX, 68
     MOV DL, 15
-    MOV BX, 75
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'N'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'T'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 15            ; word break: end of "ENTER"
-    MOV AL, 'Y'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'O'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'U'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 15            ; word break: end of "YOUR"
-    MOV AL, 'N'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'A'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'M'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, ':'
-    CALL DRAW_CHAR
+    MOV BX, 90
+    CALL DRAW_STRING
 
     ; --- Input box ---
     MOV rectX, 58
@@ -654,99 +523,18 @@ SHOW_NAME_INPUT PROC
     CALL DRAW_RECT
 
     ; --- Hint: "MAX 15 CHARS" ---
+    MOV SI, OFFSET sMax15
     MOV CX, 115
     MOV DL, 7
     MOV BX, 110
-    MOV AL, 'M'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'A'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'X'
-    CALL DRAW_CHAR
-    ADD BX, 15            ; word break: end of "MAX"
-    MOV AL, '1'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, '5'
-    CALL DRAW_CHAR
-    ADD BX, 15            ; word break: end of "15"
-    MOV AL, 'C'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'H'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'A'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'S'
-    CALL DRAW_CHAR
+    CALL DRAW_STRING
 
     ; --- Hint: "PRESS ENTER TO CONFIRM" ---
+    MOV SI, OFFSET sConfirm
     MOV CX, 130
     MOV DL, 7
     MOV BX, 60
-    MOV AL, 'P'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'S'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'S'
-    CALL DRAW_CHAR
-    ADD BX, 15            ; word break: end of "PRESS"
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'N'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'T'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 15            ; word break: end of "ENTER"
-    MOV AL, 'T'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'O'
-    CALL DRAW_CHAR
-    ADD BX, 15            ; word break: end of "TO"
-    MOV AL, 'C'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'O'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'N'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'F'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'I'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'M'
-    CALL DRAW_CHAR
+    CALL DRAW_STRING
 
     ; --- Initialize buffer ---
     MOV nameLen, 0
@@ -846,44 +634,11 @@ MM_REDRAW:
     CALL DRAW_RECT
 
     ; --- Title "BRICK BREAKER" centered in banner ---
+    MOV SI, OFFSET sTitle
     MOV CX, 10
     MOV DL, 14
-    MOV BX, 87
-    MOV AL, 'B'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'I'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'C'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'K'
-    CALL DRAW_CHAR
-    ADD BX, 14
-    MOV AL, 'B'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'A'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'K'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'R'
-    CALL DRAW_CHAR
+    MOV BX, 99
+    CALL DRAW_STRING
 
     ; --- Draw the four menu boxes/options ---
     CALL DRAW_MENU_ITEMS
@@ -917,38 +672,11 @@ MM_NAME_DRAW:
 MM_NAME_DONE:
 
     ; --- Footer help text: "UP/DOWN ENTER" ---
+    MOV SI,OFFSET sUpDown
     MOV CX, 188
     MOV DL, 8
     MOV BX, 200
-    MOV AL, 'U'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'P'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, '/'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'D'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'N'
-    CALL DRAW_CHAR
-    ADD BX, 10
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'N'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'T'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'R'
-    CALL DRAW_CHAR
+    CALL DRAW_STRING
 
 MM_KEY_LOOP:
     MOV AH, 00h
@@ -1054,121 +782,29 @@ DMI_TEXT:
     JE  DMI_ITEM2
     JMP DMI_ITEM3
 
-DMI_ITEM0:                 ; "START GAME"
-    MOV BX, 110
-    MOV AL, 'S'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'T'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'A'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'T'
-    CALL DRAW_CHAR
-    ADD BX, 8
-    MOV AL, 'G'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'A'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'M'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
+DMI_ITEM0: 
+; "START GAME"
+    MOV SI, OFFSET sStart
+    MOV BX, 117
+    CALL DRAW_STRING
     JMP DMI_NEXT
 
 DMI_ITEM1:                 ; "INSTRUCTIONS"
-    MOV BX, 102
-    MOV AL, 'I'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'N'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'S'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'T'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'U'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'C'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'T'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'I'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'O'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'N'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'S'
-    CALL DRAW_CHAR
+    MOV SI, OFFSET sInstr
+    MOV BX, 107
+    CALL DRAW_STRING
     JMP DMI_NEXT
 
 DMI_ITEM2:                 ; "HIGH SCORES"
-    MOV BX, 108
-    MOV AL, 'H'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'I'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'G'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'H'
-    CALL DRAW_CHAR
-    ADD BX, 8
-    MOV AL, 'S'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'C'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'O'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'S'
-    CALL DRAW_CHAR
+    MOV SI, OFFSET sHighSc
+    MOV BX, 113
+    CALL DRAW_STRING
     JMP DMI_NEXT
 
 DMI_ITEM3:                 ; "EXIT"
-    MOV BX, 142
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'X'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'I'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'T'
-    CALL DRAW_CHAR
+    MOV SI, OFFSET sExit
+    MOV BX, 143
+    CALL DRAW_STRING
 
 DMI_NEXT:
     INC BP
@@ -1209,44 +845,12 @@ SHOW_INSTRUCTIONS PROC
     CALL DRAW_RECT
 
     ; --- Title "INSTRUCTIONS" ---
+    MOV SI, OFFSET sInstr
     MOV BX, 102
     MOV CX, 7
     MOV DL, 15
-    MOV AL, 'I'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'N'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'S'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'T'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'U'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'C'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'T'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'I'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'O'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'N'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'S'
-    CALL DRAW_CHAR
+  
+    CALL DRAW_STRING
 
     ;-----------------------------------------------------------
     ; SECTION 1: CONTROLS (yellow heading)
@@ -1259,90 +863,19 @@ SHOW_INSTRUCTIONS PROC
     MOV rectColor, 14
     CALL DRAW_RECT
 
+    MOV SI,OFFSET sCtrl
     MOV BX, 22
     MOV CX, 33
     MOV DL, 14
     MOV AL, 'C'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'O'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'N'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'T'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'O'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'L'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'S'
-    CALL DRAW_CHAR
+    CALL DRAW_STRING
 
     ; Body: "A / D OR ARROW = MOVE PADDLE"
+    MOV SI,OFFSET sADinst
     MOV BX, 30
     MOV CX, 47
     MOV DL, 7
-    MOV AL, 'A'
-    CALL DRAW_CHAR
-    ADD BX, 10
-    MOV AL, '/'
-    CALL DRAW_CHAR
-    ADD BX, 10
-    MOV AL, 'D'
-    CALL DRAW_CHAR
-    ADD BX, 12
-    MOV AL, 'O'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 12
-    MOV AL, 'A'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'O'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'W'
-    CALL DRAW_CHAR
-    ADD BX, 12
-    MOV AL, '='
-    CALL DRAW_CHAR
-    ADD BX, 12
-    MOV AL, 'M'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'O'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'V'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 12
-    MOV AL, 'P'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'A'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'D'
-    CALL DRAW_CHAR
+    CALL DRAW_STRING
 
     ;-----------------------------------------------------------
     ; SECTION 2: OBJECTIVE
@@ -1354,108 +887,19 @@ SHOW_INSTRUCTIONS PROC
     MOV rectColor, 14
     CALL DRAW_RECT
 
+    MOV SI,OFFSET sObj
     MOV BX, 22
     MOV CX, 65
     MOV DL, 14
     MOV AL, 'O'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'B'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'J'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'C'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'T'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'I'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'V'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
+    CALL DRAW_STRING
 
     ; Body: "BREAK ALL BRICKS TO ADVANCE"
+    MOV SI,OFFSET sBreak
     MOV BX, 30
     MOV CX, 79
     MOV DL, 7
-    MOV AL, 'B'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'A'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'K'
-    CALL DRAW_CHAR
-    ADD BX, 11
-    MOV AL, 'A'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'L'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'L'
-    CALL DRAW_CHAR
-    ADD BX, 11
-    MOV AL, 'B'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'I'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'C'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'K'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'S'
-    CALL DRAW_CHAR
-    ADD BX, 11
-    MOV AL, 'T'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'O'
-    CALL DRAW_CHAR
-    ADD BX, 11
-    MOV AL, 'A'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'D'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'V'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'A'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'N'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'C'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
+    CALL DRAW_STRING
 
     ;-----------------------------------------------------------
     ; SECTION 3: LIVES & BALL RULES
@@ -1467,133 +911,24 @@ SHOW_INSTRUCTIONS PROC
     MOV rectColor, 14
     CALL DRAW_RECT
 
+    MOV SI,OFFSET sLivesH
     MOV BX, 22
     MOV CX, 97
     MOV DL, 14
-    MOV AL, 'L'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'I'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'V'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'S'
-    CALL DRAW_CHAR
-    ADD BX, 11
-    MOV AL, '&'
-    CALL DRAW_CHAR
-    ADD BX, 11
-    MOV AL, 'B'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'A'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'L'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'L'
-    CALL DRAW_CHAR
+    CALL DRAW_STRING
 
-    ; Body line 1: "START WITH 3 LIVES"
+    ; Body line 1: "START WITH 3 LIVES MISS BALL = 1 LOSE"
+    MOV SI,OFFSET sLivesD
     MOV BX, 30
     MOV CX, 111
     MOV DL, 7
-    MOV AL, 'S'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'T'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'A'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'T'
-    CALL DRAW_CHAR
-    ADD BX, 11
-    MOV AL, 'W'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'I'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'T'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'H'
-    CALL DRAW_CHAR
-    ADD BX, 11
-    MOV AL, '3'
-    CALL DRAW_CHAR
-    ADD BX, 11
-    MOV AL, 'L'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'I'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'V'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'S'
-    CALL DRAW_CHAR
+    CALL DRAW_STRING
 
-    ; Body line 2: "MISS BALL = LOSE 1 LIFE"
+    MOV SI,OFFSET sMS
     MOV BX, 30
-    MOV CX, 122
+    MOV CX, 125
     MOV DL, 7
-    MOV AL, 'M'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'I'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'S'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'S'
-    CALL DRAW_CHAR
-    ADD BX, 11
-    MOV AL, 'B'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'A'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'L'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'L'
-    CALL DRAW_CHAR
-    ADD BX, 11
-    MOV AL, '='
-    CALL DRAW_CHAR
-    ADD BX, 11
-    MOV AL, 'L'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'O'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'S'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 11
-    MOV AL, '1'
-    CALL DRAW_CHAR
+    CALL DRAW_STRING
 
     ;-----------------------------------------------------------
     ; SECTION 4: BONUSES (with colored sample squares)
@@ -1605,29 +940,11 @@ SHOW_INSTRUCTIONS PROC
     MOV rectColor, 14
     CALL DRAW_RECT
 
+    MOV SI,OFFSET sBonusH
     MOV BX, 22
     MOV CX, 138
     MOV DL, 14
-    MOV AL, 'B'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'O'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'N'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'U'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'S'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'S'
-    CALL DRAW_CHAR
+    CALL DRAW_STRING
 
     ; Cyan square + "SLOW BALL"
     MOV rectX, 30
@@ -1637,32 +954,11 @@ SHOW_INSTRUCTIONS PROC
     MOV rectColor, 3
     CALL DRAW_RECT
 
+    MOV SI,OFFSET sSlow
     MOV BX, 44
     MOV CX, 152
     MOV DL, 7
-    MOV AL, 'S'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'L'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'O'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'W'
-    CALL DRAW_CHAR
-    ADD BX, 11
-    MOV AL, 'B'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'A'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'L'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'L'
-    CALL DRAW_CHAR
+    CALL DRAW_STRING
 
     ; Green square + "EXTRA LIFE"
     MOV rectX, 165
@@ -1672,35 +968,11 @@ SHOW_INSTRUCTIONS PROC
     MOV rectColor, 2
     CALL DRAW_RECT
 
+    MOV SI,OFFSET sExtra
     MOV BX, 179
     MOV CX, 152
     MOV DL, 7
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'X'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'T'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'A'
-    CALL DRAW_CHAR
-    ADD BX, 11
-    MOV AL, 'L'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'I'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'F'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
+    CALL DRAW_STRING
 
     ; Yellow square + "WIDE PADDLE" (centered below)
     MOV rectX, 95
@@ -1710,38 +982,11 @@ SHOW_INSTRUCTIONS PROC
     MOV rectColor, 14
     CALL DRAW_RECT
 
+    MOV SI,OFFSET sWide
     MOV BX, 109
     MOV CX, 166
     MOV DL, 7
-    MOV AL, 'W'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'I'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'D'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 11
-    MOV AL, 'P'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'A'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'D'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'D'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'L'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
+    CALL DRAW_STRING
 
     ;-----------------------------------------------------------
     ; FOOTER: "PRESS ANY KEY TO RETURN"
@@ -1753,65 +998,11 @@ SHOW_INSTRUCTIONS PROC
     MOV rectColor, 1
     CALL DRAW_RECT
 
+    MOV SI,OFFSET sReturn
     MOV BX, 60
     MOV CX, 188
     MOV DL, 15
-    MOV AL, 'P'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'S'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'S'
-    CALL DRAW_CHAR
-    ADD BX, 11
-    MOV AL, 'A'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'N'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'Y'
-    CALL DRAW_CHAR
-    ADD BX, 11
-    MOV AL, 'K'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'Y'
-    CALL DRAW_CHAR
-    ADD BX, 11
-    MOV AL, 'T'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'O'
-    CALL DRAW_CHAR
-    ADD BX, 11
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'T'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'U'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'N'
-    CALL DRAW_CHAR
+    CALL DRAW_STRING
 
     CALL WAIT_KEY
     RET
@@ -1835,38 +1026,11 @@ SHOW_HIGH_SCORES PROC
     CALL DRAW_RECT
 
     ; --- Title "HIGH SCORES" ---
+    MOV SI,OFFSET sHighSc
     MOV BX, 108
     MOV CX, 7
     MOV DL, 15
-    MOV AL, 'H'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'I'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'G'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'H'
-    CALL DRAW_CHAR
-    ADD BX, 11
-    MOV AL, 'S'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'C'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'O'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'S'
-    CALL DRAW_CHAR
+    CALL DRAW_STRING
 
     ;-----------------------------------------------------------
     ; TABLE OUTER BORDER (white box around full table)
@@ -1897,53 +1061,23 @@ SHOW_HIGH_SCORES PROC
     CALL DRAW_RECT
 
     ; "RANK" header
+    MOV SI,OFFSET sRank
     MOV BX, 35
     MOV CX, 36
     MOV DL, 14
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'A'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'N'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'K'
-    CALL DRAW_CHAR
+    CALL DRAW_STRING
 
     ; "NAME" header
+    MOV SI,OFFSET sName
     MOV BX, 130
     MOV CX, 36
-    MOV AL, 'N'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'A'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'M'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
+    CALL DRAW_STRING
 
     ; "SCORE" header
+    MOV SI,OFFSET sScoreH
     MOV BX, 230
     MOV CX, 36
-    MOV AL, 'S'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'C'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'O'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
+    CALL DRAW_STRING
 
     ;-----------------------------------------------------------
     ; VERTICAL COLUMN SEPARATORS
@@ -1971,33 +1105,15 @@ SHOW_HIGH_SCORES PROC
     MOV AL, '1'
     CALL DRAW_CHAR
 
-    MOV BX, 100
+    MOV SI,OFFSET hsN1
+    MOV BX, 90
     MOV DL, 11
-    MOV AL, 'A'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'L'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'I'
-    CALL DRAW_CHAR
+    CALL DRAW_STRING
 
+    MOV SI,OFFSET hsS1
     MOV BX, 232
     MOV DL, 10
-    MOV AL, '0'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, '5'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, '0'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, '0'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, '0'
-    CALL DRAW_CHAR
+    CALL DRAW_STRING
 
     ; Row separator
     MOV rectX, 21
@@ -2016,36 +1132,15 @@ SHOW_HIGH_SCORES PROC
     MOV AL, '2'
     CALL DRAW_CHAR
 
-    MOV BX, 100
+    MOV SI,OFFSET hsN2
+    MOV BX, 90
     MOV DL, 11
-    MOV AL, 'S'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'A'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'A'
-    CALL DRAW_CHAR
+    CALL DRAW_STRING
 
+    MOV SI,OFFSET hsS2
     MOV BX, 232
     MOV DL, 10
-    MOV AL, '0'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, '4'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, '2'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, '0'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, '0'
-    CALL DRAW_CHAR
+    CALL DRAW_STRING
 
     MOV rectX, 21
     MOV rectY, 96
@@ -2057,45 +1152,22 @@ SHOW_HIGH_SCORES PROC
     ;-----------------------------------------------------------
     ; ROW 3: USMAN - 03800  (Y=102)
     ;-----------------------------------------------------------
+    
     MOV BX, 45
     MOV CX, 102
     MOV DL, 14
     MOV AL, '3'
     CALL DRAW_CHAR
 
-    MOV BX, 100
+    MOV SI,OFFSET hsN3
+    MOV BX, 90
     MOV DL, 11
-    MOV AL, 'U'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'S'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'M'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'A'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'N'
-    CALL DRAW_CHAR
+    CALL DRAW_STRING
 
+    MOV SI,OFFSET hsS3
     MOV BX, 232
     MOV DL, 10
-    MOV AL, '0'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, '3'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, '8'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, '0'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, '0'
-    CALL DRAW_CHAR
+    CALL DRAW_STRING
 
     MOV rectX, 21
     MOV rectY, 120
@@ -2107,48 +1179,22 @@ SHOW_HIGH_SCORES PROC
     ;-----------------------------------------------------------
     ; ROW 4: AYESHA - 02500  (Y=126)
     ;-----------------------------------------------------------
+    
     MOV BX, 45
     MOV CX, 126
     MOV DL, 14
     MOV AL, '4'
     CALL DRAW_CHAR
 
-    MOV BX, 100
+    MOV SI,OFFSET hsN4
+    MOV BX, 90
     MOV DL, 11
-    MOV AL, 'A'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'Y'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'S'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'H'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'A'
-    CALL DRAW_CHAR
+    CALL DRAW_STRING
 
+    MOV SI,OFFSET hsS4
     MOV BX, 232
     MOV DL, 10
-    MOV AL, '0'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, '2'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, '5'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, '0'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, '0'
-    CALL DRAW_CHAR
+    CALL DRAW_STRING
 
     MOV rectX, 21
     MOV rectY, 144
@@ -2160,45 +1206,22 @@ SHOW_HIGH_SCORES PROC
     ;-----------------------------------------------------------
     ; ROW 5: BILAL - 01100  (Y=150)
     ;-----------------------------------------------------------
+    
     MOV BX, 45
     MOV CX, 150
     MOV DL, 14
     MOV AL, '5'
     CALL DRAW_CHAR
 
-    MOV BX, 100
+    MOV SI,OFFSET hsN5
+    MOV BX, 90
     MOV DL, 11
-    MOV AL, 'B'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'I'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'L'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'A'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'L'
-    CALL DRAW_CHAR
+    CALL DRAW_STRING
 
+    MOV SI,OFFSET hsS5
     MOV BX, 232
     MOV DL, 10
-    MOV AL, '0'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, '1'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, '1'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, '0'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, '0'
-    CALL DRAW_CHAR
+    CALL DRAW_STRING
 
     ;-----------------------------------------------------------
     ; FOOTER: "PRESS ANY KEY TO RETURN"
@@ -2210,65 +1233,11 @@ SHOW_HIGH_SCORES PROC
     MOV rectColor, 1
     CALL DRAW_RECT
 
+    MOV SI,OFFSET sReturn
     MOV BX, 60
     MOV CX, 188
     MOV DL, 15
-    MOV AL, 'P'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'S'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'S'
-    CALL DRAW_CHAR
-    ADD BX, 11
-    MOV AL, 'A'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'N'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'Y'
-    CALL DRAW_CHAR
-    ADD BX, 11
-    MOV AL, 'K'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'Y'
-    CALL DRAW_CHAR
-    ADD BX, 11
-    MOV AL, 'T'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'O'
-    CALL DRAW_CHAR
-    ADD BX, 11
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'T'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'U'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'N'
-    CALL DRAW_CHAR
+    CALL DRAW_STRING
 
     CALL WAIT_KEY
     RET
@@ -2414,7 +1383,7 @@ GS_BCOL:
     ; rectX = column * 23 + 5
     MOV AX, CX
     IMUL AX, 23
-    ADD AX, 5
+    ADD AX, 11
     MOV rectX, AX
 
     ; rectY = row * 9 + 22
@@ -2487,65 +1456,11 @@ GS_BRICKS_DONE:
     ;-----------------------------------------------------------
     ; FOOTER: "PRESS ANY KEY TO RETURN"
     ;-----------------------------------------------------------
+    MOV SI,OFFSET sReturn
     MOV BX, 60
-    MOV CX, 194
+    MOV CX, 148
     MOV DL, 7
-    MOV AL, 'P'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'S'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'S'
-    CALL DRAW_CHAR
-    ADD BX, 11
-    MOV AL, 'A'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'N'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'Y'
-    CALL DRAW_CHAR
-    ADD BX, 11
-    MOV AL, 'K'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'Y'
-    CALL DRAW_CHAR
-    ADD BX, 11
-    MOV AL, 'T'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'O'
-    CALL DRAW_CHAR
-    ADD BX, 11
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'E'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'T'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'U'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'R'
-    CALL DRAW_CHAR
-    ADD BX, 9
-    MOV AL, 'N'
-    CALL DRAW_CHAR
+    CALL DRAW_STRING
 
     CALL WAIT_KEY
     RET
