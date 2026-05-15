@@ -3,8 +3,7 @@ Brick Breaker — 8086 Assembly (DOS / VGA Mode 13h)
 A fully playable arcade Brick Breaker game written entirely in **16-bit x86 Assembly** for DOS, using **VGA Mode 13h (320×200, 256 colors)**. No C, no libraries — every pixel is pushed directly to video memory at `A000:0000`. Built as a semester project for the Computer Organization & Assembly Language (COAL) course at FAST-NUCES Islamabad.
 
 > **Course:** EE-2003 — Computer Organization and Assembly Language  
-> **Program:** BS Software Engineering, Semester 4, Spring 2026  
-> **Authors:** Muhammad Bilal, Hafiza Eshal Fatima, Rana Hanan Shafique
+> **Program:** BS Software Engineering, Semester 4, Spring 2026 
 
 ---
 
@@ -137,12 +136,3 @@ The ASM file is organized in sections rather than one flat block of code:
 
 ---
 
-## Authors
-
-| Roll Number | Contribution |
-|---|---|
-| i24-3168 | Muhammad Bilal |
-| i24-3152 | Hafiza Eshal Fatima |
-| i24-3169 | Rana Hanan Shafique |
-
-FAST-NUCES Islamabad — BS Software Engineering, Spring 2026
