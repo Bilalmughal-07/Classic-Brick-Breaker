@@ -1,15 +1,14 @@
 
 
 
-                   ;==============================================================
-                   ;=                   COAL Semester Project                    =
-                   ;=                  Section-A  |   24-Batch                   =
-                   ;=              Muhammad Bilal        i243168                 =
-                   ;=              Hafiza Eshal Fatima   i243152                 =
-                   ;=              Rana Hanan Shafique   i243169                 =
-                   ;=                  BS Software Engineering                   =
-                   ;==============================================================
-
+;==============================================================
+;=                   COAL Semester Project                    =
+;=                  Section-A  |   24-Batch                   =
+;=              Muhammad Bilal        i243168                 =
+;=              Hafiza Eshal Fatima   i243152                 =
+;=              Rana Hanan Shafique   i243169                 =
+;=                  BS Software Engineering                   =
+;==============================================================
 
 .MODEL SMALL
 .386
@@ -18,7 +17,7 @@
 .DATA
 
     ;==============================================================
-    ; ITERATION 1 DATA (preserved)
+    ; ITERATION 1 DATA 
     ;==============================================================
     playerName  DB  16 DUP(0)
     nameLen     DB  0
@@ -126,11 +125,12 @@
     puH         EQU 6           ; power-up height
     puSpeed     EQU 2           ; fall speed (pixels per frame)
     rngState    DW  12345       ; RNG seed
+    soundOn     DB  1            ; 1 = sound enabled, 0 = muted (M to toggle)
 
     ;==============================================================
     ; STRING CONSTANTS (Iteration 1)
     ;==============================================================
-    sTitle      DB 'BRICK BREAKER',0
+    sTitle      DB 254, 254, ' BRICK BREAKER ', 254, 254, 0
     sSub        DB 'ARCADE CLASSIC',0
     sPress      DB 'PRESS ANY KEY TO CONTINUE',0
     sNameHdr    DB 'NAME INPUT',0
@@ -152,6 +152,7 @@
     sMS         DB 'MISS BALL = LOSE 1',0
     sBonusH     DB 'BONUSES',0
     sSlow       DB 'SLOW BALL',0
+    sFast       DB 'FAST BALL',0
     sExtra      DB 'EXTRA LIFE',0
     sWide       DB 'WIDE PADDLE',0
     sReturn     DB 'PRESS ANY KEY TO RETURN',0
@@ -197,6 +198,31 @@
     sLvLabel    DB 'LV:',0
     sLfLabel    DB 'LF:',0
     sPlLabel    DB 'PL:',0
+    sCtrlMove   DB ' Move ',0
+    sCtrlEnter  DB 'Enter',0
+    sCtrlConf   DB ' Confirm',0
+
+    customPalette DB 2, 3, 6       ; 0: #0B0F1A (Background)
+                  DB 4, 6, 11      ; 1: #101A2C (Secondary Background)
+                  DB 14, 63, 5     ; 2: #39FF14 (Vibrant Green)
+                  DB 0, 57, 63     ; 3: #00E5FF (Neon Cyan)
+                  DB 63, 19, 19    ; 4: #FF4D4D (Red)
+                  DB 63, 35, 16    ; 5: #FF8C42 (Orange)
+                  DB 8, 12, 18     ; 6: Selected Button Fill (#223048)
+                  DB 47, 49, 53    ; 7: #BFC7D5 (Secondary Text)
+                  DB 14, 20, 26    ; 8: #3A506B (Borders / Slate / Dark Gray)
+                  DB 0, 57, 63     ; 9: #00E5FF (Selection/Active Item)
+                  DB 14, 63, 5     ; 10: #39FF14 (Bright Green / Level/Extra Life)
+                  DB 0, 57, 63     ; 11: #00E5FF (Light Cyan)
+                  DB 63, 35, 16    ; 12: #FF8C42 (Light Red / Fast Ball)
+                  DB 6, 9, 14      ; 13: #1B263B (Buttons Background)
+                  DB 63, 53, 2     ; 14: #FFD60A (Golden Yellow Title / Yellow brick)
+                  DB 63, 63, 63    ; 15: #FFFFFF (White)
+
+    sDevBy        DB 'Developed by',0
+    sDev1         DB 'Eshal Fatima',0
+    sDev2         DB 'Muhammad Bilal',0
+    sDev3         DB 'Rana Hanan',0
 
 .CODE
 
@@ -220,8 +246,39 @@ INIT_GRAPHICS PROC
     MOV fontSeg, AX
     POP ES
 
+    CALL INIT_PALETTE
     RET
 INIT_GRAPHICS ENDP
+
+;==============================================================
+; INIT_PALETTE
+;==============================================================
+INIT_PALETTE PROC
+    PUSH AX
+    PUSH CX
+    PUSH DX
+    PUSH SI
+
+    ; Start writing at palette index 0
+    MOV DX, 3C8h
+    MOV AL, 0
+    OUT DX, AL
+
+    ; Write RGB triplets to PEL data register
+    MOV DX, 3C9h
+    MOV SI, OFFSET customPalette
+    MOV CX, 48              ; 16 colors * 3 bytes each
+IP_LP:
+    LODSB
+    OUT DX, AL
+    LOOP IP_LP
+
+    POP SI
+    POP CX
+    POP DX
+    POP AX
+    RET
+INIT_PALETTE ENDP
 
 ;==============================================================
 ; CLEAR_SCREEN
@@ -498,6 +555,9 @@ WAIT_KEY ENDP
 ;   Uses PIT channel 2 (ports 42h/43h) and speaker gate (port 61h)
 ;==============================================================
 PLAY_SOUND PROC
+    CMP soundOn, 0          ; is sound muted?
+    JE  PS_MUTED            ; yes -> skip everything
+
     PUSH AX
     PUSH CX
     PUSH DX
@@ -536,6 +596,9 @@ PS_INNER:
     POP CX
     POP AX
     RET
+
+PS_MUTED:
+    RET                     ; do nothing, return silently
 PLAY_SOUND ENDP
 
 ;--------------------------------------------------------------
@@ -716,18 +779,10 @@ STRLEN ENDP
 ; SHOW_HOME_SCREEN (Iter 1, unchanged)
 ;==============================================================
 SHOW_HOME_SCREEN PROC
-    MOV AL, 1
+    MOV AL, 0
     CALL CLEAR_SCREEN
 
-    MOV rectX, 0
-    MOV rectY, 0
-    MOV rectW, 320
-    MOV rectH, 15
-    MOV rectColor, 9
-    CALL DRAW_RECT
-
-    MOV rectY, 185
-    CALL DRAW_RECT
+    ; Note: Removed top/bottom blue rectangles to keep navy background clean
 
     MOV CX, 0
 HS_BRICK1:
@@ -754,7 +809,7 @@ HS_BRICK1:
     JMP H_DRAW1
     H_C1: MOV rectColor, 14
     JMP H_DRAW1
-H_C2: MOV rectColor, 2
+    H_C2: MOV rectColor, 2
 H_DRAW1:
     CALL DRAW_RECT
     INC CX
@@ -785,13 +840,15 @@ H_DRAW2:
     JMP HS_BRICK2
 HS_BRICK2_DONE:
 
+    ; Outer Border of Title Box (Slate border, color 8)
     MOV rectX, 25
     MOV rectY, 72
     MOV rectW, 270
     MOV rectH, 52
-    MOV rectColor, 15
+    MOV rectColor, 8
     CALL DRAW_RECT_BORDER
 
+    ; Inner Fill of Title Box (Background, color 0)
     MOV rectX, 26
     MOV rectY, 73
     MOV rectW, 268
@@ -799,23 +856,50 @@ HS_BRICK2_DONE:
     MOV rectColor, 0
     CALL DRAW_RECT
 
+    ; Draw centered game title (golden yellow, color 14)
     MOV SI, OFFSET sTitle
     MOV CX, 86
     MOV DL, 14
-    MOV BX, 101
+    MOV BX, 80
     CALL DRAW_STRING
 
+    ; Draw centered subtitle (light gray, color 7)
     MOV SI, OFFSET sSub
     MOV CX, 103
-    MOV DL, 14
-    MOV BX, 97
+    MOV DL, 7
+    MOV BX, 98
     CALL DRAW_STRING
+
+    ; --- PRESS KEY BOX ---
+    ; Outer border glow (secondary background dark blue-gray, color 1)
+    MOV rectX, 47
+    MOV rectY, 151
+    MOV rectW, 226
+    MOV rectH, 22
+    MOV rectColor, 1
+    CALL DRAW_RECT_BORDER
+
+    ; Slate border (color 8)
+    MOV rectX, 48
+    MOV rectY, 152
+    MOV rectW, 224
+    MOV rectH, 20
+    MOV rectColor, 8
+    CALL DRAW_RECT_BORDER
+
+    ; Dark gray background fill (color 13)
+    MOV rectX, 49
+    MOV rectY, 153
+    MOV rectW, 222
+    MOV rectH, 18
+    MOV rectColor, 13
+    CALL DRAW_RECT
 
 HS_FLASH:
     MOV SI, OFFSET sPress
     MOV BX, 54
     MOV CX, 158
-    MOV DL, 15
+    MOV DL, 9                     ; neon cyan text
     CALL DRAW_STRING
 
     MOV CX, 6
@@ -825,11 +909,12 @@ HS_FLASH:
     INT 16h
     JNZ HS_GOT_KEY
 
-    MOV rectX, 40
-    MOV rectY, 156
-    MOV rectW, 240
-    MOV rectH, 12
-    MOV rectColor, 0
+    ; Erase prompt text by filling with box background color (color 13)
+    MOV rectX, 49
+    MOV rectY, 153
+    MOV rectW, 222
+    MOV rectH, 18
+    MOV rectColor, 13
     CALL DRAW_RECT
 
     MOV CX, 4
@@ -850,7 +935,7 @@ SHOW_HOME_SCREEN ENDP
 ; SHOW_NAME_INPUT (Iter 1, unchanged)
 ;==============================================================
 SHOW_NAME_INPUT PROC
-    MOV AL, 8
+    MOV AL, 0
     CALL CLEAR_SCREEN
 
     MOV rectX, 0
@@ -858,6 +943,14 @@ SHOW_NAME_INPUT PROC
     MOV rectW, 320
     MOV rectH, 22
     MOV rectColor, 1
+    CALL DRAW_RECT
+
+    ; Header underline
+    MOV rectX, 0
+    MOV rectY, 22
+    MOV rectW, 320
+    MOV rectH, 1
+    MOV rectColor, 8
     CALL DRAW_RECT
 
     MOV SI, OFFSET sNameHdr
@@ -876,14 +969,14 @@ SHOW_NAME_INPUT PROC
     MOV rectY, 83
     MOV rectW, 204
     MOV rectH, 22
-    MOV rectColor, 15
+    MOV rectColor, 8
     CALL DRAW_RECT_BORDER
 
     MOV rectX, 59
     MOV rectY, 84
     MOV rectW, 202
     MOV rectH, 20
-    MOV rectColor, 0
+    MOV rectColor, 13
     CALL DRAW_RECT
 
     MOV SI, OFFSET sMax15
@@ -914,11 +1007,31 @@ NI_LOOP:
     JE  NI_CONFIRM
     CMP AL, 08h
     JE  NI_BACKSPACE
-    CMP AL, 32
-    JL  NI_LOOP
-    CMP AL, 126
-    JG  NI_LOOP
 
+    ; --- Input validation: only A-Z, a-z, 0-9, and SPACE allowed ---
+    CMP AL, ' '
+    JE  NI_STORE             ; allow space
+
+    CMP AL, 'A'
+    JL  CHECK_DIGIT          ; below 'A' -> check digits
+    CMP AL, 'Z'
+    JLE NI_STORE             ; A-Z -> accept
+
+    CMP AL, 'a'
+    JL  CHECK_DIGIT          ; between 'Z'+1 and 'a'-1 -> check digits
+    CMP AL, 'z'
+    JG  CHECK_DIGIT          ; above 'z' -> check digits
+    ; Convert lowercase to uppercase for consistent display
+    SUB AL, 20h
+    JMP NI_STORE             ; a-z -> accept as A-Z
+
+CHECK_DIGIT:
+    CMP AL, '0'
+    JL  NI_LOOP              ; reject: below '0'
+    CMP AL, '9'
+    JG  NI_LOOP              ; reject: above '9'
+
+NI_STORE:
     MOV BL, nameLen
     CMP BL, 15
     JGE NI_LOOP
@@ -933,7 +1046,7 @@ NI_LOOP:
     ADD BX, 63
 
     MOV CX, 88
-    MOV DL, 11
+    MOV DL, 9                      ; Neon Cyan echo
     MOVZX SI, nameLen
     DEC SI
     MOV AL, playerName[SI]
@@ -954,7 +1067,7 @@ NI_BACKSPACE:
     MOV rectY, 85
     MOV rectW, 9
     MOV rectH, 18
-    MOV rectColor, 0
+    MOV rectColor, 13              ; match box background color
     CALL DRAW_RECT
     JMP NI_LOOP
 
@@ -967,7 +1080,7 @@ NI_CONFIRM:
     MOV SI, OFFSET sNameReq
     MOV BX, 101
     MOV CX, 145
-    MOV DL, 12
+    MOV DL, 4                      ; Red error text
     CALL DRAW_STRING
 
     MOV CX, 15
@@ -978,7 +1091,7 @@ NI_CONFIRM:
     MOV rectY, 142
     MOV rectW, 150
     MOV rectH, 14
-    MOV rectColor, 8         ; match background
+    MOV rectColor, 0               ; Match screen background color
     CALL DRAW_RECT
 
     JMP NI_LOOP
@@ -999,23 +1112,20 @@ MM_REDRAW:
     MOV AL, 0
     CALL CLEAR_SCREEN
 
-    MOV rectX, 0
-    MOV rectY, 0
-    MOV rectW, 320
-    MOV rectH, 28
-    MOV rectColor, 1
-    CALL DRAW_RECT
+    ; Note: Removed top blue header block to keep navy background clean
 
+    ; Centered game title (golden yellow, color 14)
     MOV SI, OFFSET sTitle
     MOV CX, 10
     MOV DL, 14
-    MOV BX, 99
+    MOV BX, 80
     CALL DRAW_STRING
 
     CALL DRAW_MENU_ITEMS
 
+    ; Draw player name PL: <name> at bottom-left (X=4, Y=188)
     MOV CX, 188
-    MOV DL, 7
+    MOV DL, 7 ; light gray
     MOV BX, 4
     MOV AL, 'P'
     CALL DRAW_CHAR
@@ -1028,7 +1138,7 @@ MM_REDRAW:
     ADD BX, 8
 
     MOV SI, 0
-    MOV DL, 11
+    MOV DL, 9 ; neon cyan
 MM_NAME_DRAW:
     MOV AL, playerName[SI]
     CMP AL, 0
@@ -1040,10 +1150,31 @@ MM_NAME_DRAW:
     JL  MM_NAME_DRAW
 MM_NAME_DONE:
 
-    MOV SI,OFFSET sUpDown
+    ; Draw Bottom Controls at X=136, Y=188
+    MOV BX, 136
     MOV CX, 188
-    MOV DL, 8
-    MOV BX, 200
+    MOV AL, 24                     ; ↑
+    MOV DL, 9                      ; neon cyan
+    CALL DRAW_CHAR
+    ADD BX, 9
+
+    MOV AL, 25                     ; ↓
+    MOV DL, 9                      ; neon cyan
+    CALL DRAW_CHAR
+    ADD BX, 9
+
+    MOV SI, OFFSET sCtrlMove
+    MOV DL, 7                      ; light gray
+    CALL DRAW_STRING
+    ADD BX, 48
+
+    MOV SI, OFFSET sCtrlEnter
+    MOV DL, 9                      ; neon cyan
+    CALL DRAW_STRING
+    ADD BX, 45
+
+    MOV SI, OFFSET sCtrlConf
+    MOV DL, 7                      ; light gray
     CALL DRAW_STRING
 
 MM_KEY_LOOP:
@@ -1168,27 +1299,44 @@ DMI_LOOP:
     MOV rectX, 60
     MOV rectW, 200
     MOV rectH, 24
+
+    ; Draw Shadow (color 0)
+    PUSH rectX
+    PUSH rectY
+    ADD rectX, 2
+    ADD rectY, 2
+    MOV rectColor, 0
+    CALL DRAW_RECT
+    POP rectY
+    POP rectX
+
     MOV AL, menuSel
     MOVZX BX, AL
     CMP BP, BX
     JE  DMI_SELECTED
-    MOV rectColor, 8
+
+    ; Unselected Button Styling
+    MOV rectColor, 13         ; dark button gray (#1B263B)
     CALL DRAW_RECT
-    MOV rectColor, 7
+    MOV rectColor, 8          ; thin border (#3A506B)
     CALL DRAW_RECT_BORDER
     JMP DMI_TEXT
+
 DMI_SELECTED:
-    MOV rectColor, 6
+    ; Selected Button Styling
+    MOV rectColor, 6          ; slightly brighter background (#223048)
     CALL DRAW_RECT
-    MOV rectColor, 14
+    MOV rectColor, 9          ; neon cyan border (#00E5FF)
     CALL DRAW_RECT_BORDER
+
+    ; Glowing selection arrow '>' on the left
     MOV AX, BP
     IMUL AX, 32
     ADD AX, 38 + 8
     MOV CX, AX
     MOV BX, 66
     MOV AL, '>'
-    MOV DL, 14
+    MOV DL, 9                 ; neon cyan
     CALL DRAW_CHAR
 DMI_TEXT:
     MOV AX, BP
@@ -1244,19 +1392,24 @@ SHOW_INSTRUCTIONS PROC
     MOV rectY, 0
     MOV rectW, 320
     MOV rectH, 22
-    MOV rectColor, 2
+    MOV rectColor, 1
     CALL DRAW_RECT
+
+    ; Header underline
     MOV rectX, 0
     MOV rectY, 22
     MOV rectW, 320
     MOV rectH, 1
-    MOV rectColor, 10
+    MOV rectColor, 8
     CALL DRAW_RECT
+
     MOV SI, OFFSET sInstr
     MOV BX, 102
     MOV CX, 7
-    MOV DL, 15
+    MOV DL, 14                     ; Golden yellow title
     CALL DRAW_STRING
+
+    ; Controls Section
     MOV rectX, 12
     MOV rectY, 33
     MOV rectW, 4
@@ -1271,8 +1424,10 @@ SHOW_INSTRUCTIONS PROC
     MOV SI,OFFSET sADinst
     MOV BX, 30
     MOV CX, 47
-    MOV DL, 7
+    MOV DL, 7                      ; Secondary text gray
     CALL DRAW_STRING
+
+    ; Objective Section
     MOV rectX, 12
     MOV rectY, 65
     MOV rectW, 4
@@ -1281,7 +1436,7 @@ SHOW_INSTRUCTIONS PROC
     CALL DRAW_RECT
     MOV SI,OFFSET sObj
     MOV BX, 22
-    MOV CX, 65
+    MOV CX, 65                     ; Fixed position bug (originally Y=5)
     MOV DL, 14
     CALL DRAW_STRING
     MOV SI,OFFSET sBreak
@@ -1289,6 +1444,8 @@ SHOW_INSTRUCTIONS PROC
     MOV CX, 79
     MOV DL, 7
     CALL DRAW_STRING
+
+    ; Lives Section
     MOV rectX, 12
     MOV rectY, 97
     MOV rectW, 4
@@ -1310,6 +1467,8 @@ SHOW_INSTRUCTIONS PROC
     MOV CX, 125
     MOV DL, 7
     CALL DRAW_STRING
+
+    ; Bonuses Section
     MOV rectX, 12
     MOV rectY, 138
     MOV rectW, 4
@@ -1321,49 +1480,80 @@ SHOW_INSTRUCTIONS PROC
     MOV CX, 138
     MOV DL, 14
     CALL DRAW_STRING
+
+    ; Bonus items
+    ; 1. Slow Ball (Light Cyan: color 11)
     MOV rectX, 30
     MOV rectY, 152
     MOV rectW, 8
     MOV rectH, 8
-    MOV rectColor, 3
+    MOV rectColor, 11
     CALL DRAW_RECT
     MOV SI,OFFSET sSlow
     MOV BX, 44
     MOV CX, 152
     MOV DL, 7
     CALL DRAW_STRING
+
+    ; 2. Extra Life (Light Green: color 10)
     MOV rectX, 165
     MOV rectY, 152
     MOV rectW, 8
     MOV rectH, 8
-    MOV rectColor, 2
+    MOV rectColor, 10
     CALL DRAW_RECT
     MOV SI,OFFSET sExtra
     MOV BX, 179
     MOV CX, 152
     MOV DL, 7
     CALL DRAW_STRING
-    MOV rectX, 95
+
+    ; 3. Fast Ball (Light Red / Speed: color 12)
+    MOV rectX, 30
+    MOV rectY, 166
+    MOV rectW, 8
+    MOV rectH, 8
+    MOV rectColor, 12
+    CALL DRAW_RECT
+    MOV SI,OFFSET sFast
+    MOV BX, 44
+    MOV CX, 166
+    MOV DL, 7
+    CALL DRAW_STRING
+
+    ; 4. Wide Paddle (Yellow: color 14)
+    MOV rectX, 165
     MOV rectY, 166
     MOV rectW, 8
     MOV rectH, 8
     MOV rectColor, 14
     CALL DRAW_RECT
     MOV SI,OFFSET sWide
-    MOV BX, 109
+    MOV BX, 179
     MOV CX, 166
     MOV DL, 7
     CALL DRAW_STRING
+
+    ; Footer bar top border line
+    MOV rectX, 0
+    MOV rectY, 183
+    MOV rectW, 320
+    MOV rectH, 1
+    MOV rectColor, 8
+    CALL DRAW_RECT
+
+    ; Footer bar background
     MOV rectX, 0
     MOV rectY, 184
     MOV rectW, 320
     MOV rectH, 16
     MOV rectColor, 1
     CALL DRAW_RECT
+
     MOV SI,OFFSET sReturn
     MOV BX, 60
     MOV CX, 188
-    MOV DL, 15
+    MOV DL, 9                      ; Neon Cyan prompt
     CALL DRAW_STRING
     CALL WAIT_KEY
     RET
@@ -1585,39 +1775,48 @@ SHOW_HIGH_SCORES PROC
     MOV AL, 0
     CALL CLEAR_SCREEN
 
-    ; Header
+    ; Header background
     MOV rectX, 0
     MOV rectY, 0
     MOV rectW, 320
     MOV rectH, 22
-    MOV rectColor, 9
+    MOV rectColor, 1
     CALL DRAW_RECT
+
+    ; Header underline
+    MOV rectX, 0
+    MOV rectY, 22
+    MOV rectW, 320
+    MOV rectH, 1
+    MOV rectColor, 8
+    CALL DRAW_RECT
+
     MOV SI, OFFSET sHighSc
     MOV BX, 108
     MOV CX, 7
-    MOV DL, 15
+    MOV DL, 14                     ; Golden yellow title
     CALL DRAW_STRING
 
-    ; Table border
+    ; Table border (slate color 8)
     MOV rectX, 20
     MOV rectY, 32
     MOV rectW, 280
     MOV rectH, 140
-    MOV rectColor, 15
+    MOV rectColor, 8
     CALL DRAW_RECT_BORDER
 
-    ; Column headers background
+    ; Column headers background (buttons bg color 13)
     MOV rectX, 21
     MOV rectY, 33
     MOV rectW, 278
     MOV rectH, 14
-    MOV rectColor, 8
+    MOV rectColor, 13
     CALL DRAW_RECT
     MOV rectX, 20
     MOV rectY, 47
     MOV rectW, 280
     MOV rectH, 1
-    MOV rectColor, 15
+    MOV rectColor, 8
     CALL DRAW_RECT
 
     ; Column headers text
@@ -1635,18 +1834,18 @@ SHOW_HIGH_SCORES PROC
     MOV CX, 36
     CALL DRAW_STRING
 
-    ; Column separator lines
+    ; Column separator lines (slate color 8)
     MOV rectX, 80
     MOV rectY, 32
     MOV rectW, 1
     MOV rectH, 140
-    MOV rectColor, 15
+    MOV rectColor, 8
     CALL DRAW_RECT
     MOV rectX, 215
     MOV rectY, 32
     MOV rectW, 1
     MOV rectH, 140
-    MOV rectColor, 15
+    MOV rectColor, 8
     CALL DRAW_RECT
 
     ; Draw 5 entries
@@ -1676,7 +1875,7 @@ HS_ENTRY:
     ADD SI, OFFSET hsNames
     MOV BX, 90
     MOV CX, DI
-    MOV DL, 11
+    MOV DL, 9                      ; neon cyan
     CALL DRAW_STRING
 
     ; Score: hsScores[BP*2] -> convert to string via ITOA
@@ -1688,7 +1887,7 @@ HS_ENTRY:
     MOV SI, OFFSET itoaBuf
     MOV BX, 232
     MOV CX, DI
-    MOV DL, 10
+    MOV DL, 10                     ; neon green
     CALL DRAW_STRING
 
     ; Row separator line (except after last)
@@ -1708,6 +1907,15 @@ HS_NEXT_ENTRY:
     JMP HS_ENTRY
 
 HS_FOOTER:
+    ; Footer top border line
+    MOV rectX, 0
+    MOV rectY, 183
+    MOV rectW, 320
+    MOV rectH, 1
+    MOV rectColor, 8
+    CALL DRAW_RECT
+
+    ; Footer background
     MOV rectX, 0
     MOV rectY, 184
     MOV rectW, 320
@@ -1717,7 +1925,7 @@ HS_FOOTER:
     MOV SI, OFFSET sReturn
     MOV BX, 60
     MOV CX, 188
-    MOV DL, 15
+    MOV DL, 9                      ; Neon Cyan prompt
     CALL DRAW_STRING
 
     CALL WAIT_KEY
@@ -2012,11 +2220,13 @@ DRAW_BRICKS ENDP
 ERASE_BALL PROC
     PUSH AX
     MOV AX, ballX
+    DEC AX
     MOV rectX, AX
     MOV AX, ballY
+    DEC AX
     MOV rectY, AX
-    MOV rectW, ballSize
-    MOV rectH, ballSize
+    MOV rectW, 6
+    MOV rectH, 6
     MOV rectColor, 0
     CALL DRAW_RECT
     POP AX
@@ -2025,14 +2235,94 @@ ERASE_BALL ENDP
 
 DRAW_BALL PROC
     PUSH AX
+
+    ; --- Neon Cyan Glow (Color 9) ---
+    ; Row 0 of glow (Y-1, width 2 at X+1)
+    MOV AX, ballX
+    INC AX
+    MOV rectX, AX
+    MOV AX, ballY
+    DEC AX
+    MOV rectY, AX
+    MOV rectW, 2
+    MOV rectH, 1
+    MOV rectColor, 9
+    CALL DRAW_RECT
+
+    ; Row 1 of glow (Y, width 4 at X)
     MOV AX, ballX
     MOV rectX, AX
     MOV AX, ballY
     MOV rectY, AX
-    MOV rectW, ballSize
-    MOV rectH, ballSize
+    MOV rectW, 4
+    MOV rectH, 1
+    CALL DRAW_RECT
+
+    ; Rows 2-3 of glow (Y+1 to Y+2, width 6 at X-1)
+    MOV AX, ballX
+    DEC AX
+    MOV rectX, AX
+    MOV AX, ballY
+    INC AX
+    MOV rectY, AX
+    MOV rectW, 6
+    MOV rectH, 2
+    CALL DRAW_RECT
+
+    ; Row 4 of glow (Y+3, width 4 at X)
+    MOV AX, ballX
+    MOV rectX, AX
+    MOV AX, ballY
+    ADD AX, 3
+    MOV rectY, AX
+    MOV rectW, 4
+    MOV rectH, 1
+    CALL DRAW_RECT
+
+    ; Row 5 of glow (Y+4, width 2 at X+1)
+    MOV AX, ballX
+    INC AX
+    MOV rectX, AX
+    MOV AX, ballY
+    ADD AX, 4
+    MOV rectY, AX
+    MOV rectW, 2
+    MOV rectH, 1
+    CALL DRAW_RECT
+
+    ; --- White Ball Core (Color 15) ---
+    ; Row 0: ·██· (width 2 at X+1, Y)
+    MOV AX, ballX
+    INC AX
+    MOV rectX, AX
+    MOV AX, ballY
+    MOV rectY, AX
+    MOV rectW, 2
+    MOV rectH, 1
     MOV rectColor, 15
     CALL DRAW_RECT
+
+    ; Rows 1-2: ████ (width 4 at X, Y+1)
+    MOV AX, ballX
+    MOV rectX, AX
+    MOV AX, ballY
+    INC AX
+    MOV rectY, AX
+    MOV rectW, ballSize
+    MOV rectH, 2
+    CALL DRAW_RECT
+
+    ; Row 3: ·██· (width 2 at X+1, Y+3)
+    MOV AX, ballX
+    INC AX
+    MOV rectX, AX
+    MOV AX, ballY
+    ADD AX, 3
+    MOV rectY, AX
+    MOV rectW, 2
+    MOV rectH, 1
+    CALL DRAW_RECT
+
     POP AX
     RET
 DRAW_BALL ENDP
@@ -2056,26 +2346,31 @@ ERASE_PADDLE ENDP
 
 DRAW_PADDLE PROC
     PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
+
+    ; Main fill (Dark Gray #3A506B, color index 8)
     MOV AX, paddleX
     MOV rectX, AX
     MOV rectY, paddleY
     MOV AX, paddleW
     MOV rectW, AX
     MOV rectH, paddleH
-    MOV rectColor, 7
+    MOV rectColor, 8
     CALL DRAW_RECT
 
-    ; Top highlight line (white)
+    ; Top outline (Neon Cyan, color index 9)
     MOV AX, paddleX
     MOV rectX, AX
     MOV rectY, paddleY
     MOV AX, paddleW
     MOV rectW, AX
     MOV rectH, 1
-    MOV rectColor, 15
+    MOV rectColor, 9
     CALL DRAW_RECT
 
-    ; Bottom edge line (dark)
+    ; Bottom outline (Neon Cyan, color index 9)
     MOV AX, paddleX
     MOV rectX, AX
     MOV AX, paddleY + paddleH - 1
@@ -2083,12 +2378,69 @@ DRAW_PADDLE PROC
     MOV AX, paddleW
     MOV rectW, AX
     MOV rectH, 1
-    MOV rectColor, 8
+    MOV rectColor, 9
     CALL DRAW_RECT
 
+    ; Left outline (Neon Cyan, color index 9)
+    MOV AX, paddleX
+    MOV rectX, AX
+    MOV rectY, paddleY
+    MOV rectW, 1
+    MOV rectH, paddleH
+    MOV rectColor, 9
+    CALL DRAW_RECT
+
+    ; Right outline (Neon Cyan, color index 9)
+    MOV AX, paddleX
+    ADD AX, paddleW
+    DEC AX
+    MOV rectX, AX
+    MOV rectY, paddleY
+    MOV rectW, 1
+    MOV rectH, paddleH
+    MOV rectColor, 9
+    CALL DRAW_RECT
+
+    POP DX
+    POP CX
+    POP BX
     POP AX
     RET
 DRAW_PADDLE ENDP
+
+;==============================================================
+; DRAW_CIRCLE_4 — draw a 4x4 circle shape at rectX/rectY
+;   Uses rectX, rectY, rectColor (already set by caller)
+;==============================================================
+DRAW_CIRCLE_4 PROC
+    PUSH AX
+
+    ; Row 0: ·██·
+    INC rectX
+    MOV rectW, 2
+    MOV rectH, 1
+    CALL DRAW_RECT
+    DEC rectX
+
+    ; Rows 1-2: ████
+    INC rectY
+    MOV rectW, ballSize
+    MOV rectH, 2
+    CALL DRAW_RECT
+
+    ; Row 3: ·██·
+    INC rectY
+    INC rectY
+    INC rectX
+    MOV rectW, 2
+    MOV rectH, 1
+    CALL DRAW_RECT
+    DEC rectX
+    SUB rectY, 3
+
+    POP AX
+    RET
+DRAW_CIRCLE_4 ENDP
 
 ;==============================================================
 ; UPDATE_TRAIL — shift trail positions and draw fading trail
@@ -2110,25 +2462,21 @@ UPDATE_TRAIL PROC
     MOV rectColor, 0
     CALL DRAW_RECT
 
-    ; Draw middle trail dot (dark gray)
+    ; Draw middle trail dot (dark gray circle)
     MOV AX, trailX+2
     MOV rectX, AX
     MOV AX, trailY+2
     MOV rectY, AX
-    MOV rectW, ballSize
-    MOV rectH, ballSize
     MOV rectColor, 8
-    CALL DRAW_RECT
+    CALL DRAW_CIRCLE_4
 
-    ; Draw newest trail dot (light gray)
+    ; Draw newest trail dot (light gray circle)
     MOV AX, trailX
     MOV rectX, AX
     MOV AX, trailY
     MOV rectY, AX
-    MOV rectW, ballSize
-    MOV rectH, ballSize
     MOV rectColor, 7
-    CALL DRAW_RECT
+    CALL DRAW_CIRCLE_4
 
     ; Shift positions: [2] = [1], [1] = [0], [0] = current ball
     MOV AX, trailX+2
@@ -2300,6 +2648,11 @@ RI_PEEK:
     CMP AH, 19h
     JE  RI_PAUSE
 
+    CMP AL, 'm'             ; M key = toggle mute
+    JE  RI_MUTE
+    CMP AL, 'M'
+    JE  RI_MUTE
+
     CMP AH, 4Bh
     JE  RI_LEFT
     CMP AL, 'a'
@@ -2314,6 +2667,10 @@ RI_PEEK:
     CMP AL, 'D'
     JE  RI_RIGHT
 
+    JMP RI_PEEK
+
+RI_MUTE:
+    XOR soundOn, 1          ; toggle: 0->1, 1->0
     JMP RI_PEEK
 
 RI_LEFT:
@@ -2351,13 +2708,13 @@ RI_PAUSE:
     MOV rectY, 93
     MOV rectW, 80
     MOV rectH, 18
-    MOV rectColor, 0
+    MOV rectColor, 13
     CALL DRAW_RECT
     MOV rectX, 120
     MOV rectY, 93
     MOV rectW, 80
     MOV rectH, 18
-    MOV rectColor, 15
+    MOV rectColor, 8
     CALL DRAW_RECT_BORDER
     MOV SI, OFFSET sPaused
     MOV BX, 131
@@ -2526,7 +2883,7 @@ CBC_COL:
     ; HIT — check if barrier (2) or breakable brick (1)
     CMP bricks[SI], 2
     JE  CBC_BARRIER
-
+    JGE CBC_SKIP
     ; Breakable brick: destroy it, score, bounce
     MOV bricks[SI], 0
     DEC bricksLeft
@@ -2547,109 +2904,199 @@ CBC_COL:
     CALL SPAWN_POWERUP      ; try to spawn a power-up at this brick
     CALL SND_BRICK
 
-    ; --- Axis-aware bounce ---
-    ; Overlap on Y axis at PREVIOUS frame? -> horizontal hit -> NEG dx
-    ; Else -> vertical hit -> NEG dy
+    ; --- 4-directional bounce using minimum penetration depth ---
+    ; Compute brick edges
     PUSH BP
+    PUSH DI
+    MOV AX, CX
+    IMUL AX, 23
+    ADD AX, 11              ; AX = brickLeft
+    MOV DI, AX              ; DI = brickLeft
     MOV AX, BX
     IMUL AX, 9
     ADD AX, 22              ; AX = brickTop
     MOV BP, AX              ; BP = brickTop
-    ADD AX, BRICK_H         ; AX = brickBottom
 
-    ; prevBallY = ballY - ballDY
-    MOV DX, ballY
-    SUB DX, ballDY          ; DX = prevBallY
-    ; prevBallY >= brickBottom? -> no overlap -> vertical
-    CMP DX, AX
-    JGE CBC_BR_VERT
-    ; prevBallY + ballSize <= brickTop? -> no overlap -> vertical
-    ADD DX, ballSize        ; DX = prevBallY + size
-    CMP DX, BP
-    JLE CBC_BR_VERT
+    ; Compute penetration from each side:
+    ; penRight  = (brickLeft + BRICK_W) - ballX       (ball entered from right side of brick)
+    ; penLeft   = (ballX + ballSize) - brickLeft       (ball entered from left side of brick)
+    ; penBottom = (brickTop + BRICK_H) - ballY         (ball entered from bottom of brick)
+    ; penTop    = (ballY + ballSize) - brickTop         (ball entered from top of brick)
+    ; The minimum positive penetration tells us which face the ball entered from.
 
-    ; Otherwise prev Y overlapped -> horizontal hit
+    ; penLeft = (ballX + ballSize) - brickLeft
+    MOV AX, ballX
+    ADD AX, ballSize
+    SUB AX, DI              ; AX = penLeft
+    PUSH AX                 ; [SP] = penLeft
+
+    ; penRight = (brickLeft + BRICK_W) - ballX
+    MOV AX, DI
+    ADD AX, BRICK_W
+    SUB AX, ballX           ; AX = penRight
+    PUSH AX                 ; [SP] = penRight
+
+    ; penTop = (ballY + ballSize) - brickTop
+    MOV AX, ballY
+    ADD AX, ballSize
+    SUB AX, BP              ; AX = penTop
+    PUSH AX                 ; [SP] = penTop
+
+    ; penBottom = (brickTop + BRICK_H) - ballY
+    MOV AX, BP
+    ADD AX, BRICK_H
+    SUB AX, ballY           ; AX = penBottom
+    ; AX = penBottom, [SP]=penTop, [SP+2]=penRight, [SP+4]=penLeft
+
+    ; Find minimum penetration
+    ; Start with penBottom in AX, direction flag in DX (0=top,1=bottom,2=left,3=right)
+    MOV DX, 1               ; assume bottom
+    POP BX                  ; BX = penTop
+    CMP BX, AX
+    JGE CBC_BR_CK2
+    MOV AX, BX              ; min = penTop
+    MOV DX, 0               ; direction = top
+CBC_BR_CK2:
+    POP BX                  ; BX = penRight
+    CMP BX, AX
+    JGE CBC_BR_CK3
+    MOV AX, BX              ; min = penRight
+    MOV DX, 3               ; direction = right
+CBC_BR_CK3:
+    POP BX                  ; BX = penLeft
+    CMP BX, AX
+    JGE CBC_BR_APPLY
+    MOV AX, BX              ; min = penLeft
+    MOV DX, 2               ; direction = left
+
+CBC_BR_APPLY:
+    ; DX = side: 0=hit top face (ball came from above), 1=hit bottom face (ball from below)
+    ;            2=hit left face (ball from left),       3=hit right face (ball from right)
+    CMP DX, 0
+    JE  CBC_BR_HIT_TOP
+    CMP DX, 1
+    JE  CBC_BR_HIT_BOT
+    ; DX=2 or 3: horizontal hit -> negate ballDX
     NEG ballDX
+    POP DI
     POP BP
     JMP CBC_END
 
-CBC_BR_VERT:
+CBC_BR_HIT_TOP:
+CBC_BR_HIT_BOT:
+    ; Vertical hit -> negate ballDY
     NEG ballDY
+    POP DI
     POP BP
     JMP CBC_END
 
 CBC_BARRIER:
-    ; Indestructible barrier: detect collision axis, snap, bounce, redraw
+    ; Indestructible barrier: 4-directional collision with snap + redraw
     PUSH BP
+    PUSH DI
 
-    ; Compute barrier rect: barX..barX+BRICK_W, barY..barY+BRICK_H
+    ; Compute barrier rect edges
     MOV AX, CX
     IMUL AX, 23
     ADD AX, 11
-    PUSH AX                 ; [SP] = barrier X (barX)
+    MOV DI, AX              ; DI = barX (left edge)
     MOV AX, BX
     IMUL AX, 9
     ADD AX, 22
-    MOV DI, AX              ; DI = barrier top Y (barY)
+    MOV BP, AX              ; BP = barY (top edge)
 
-    ; --- Determine collision axis using ball's PREVIOUS position ---
-    ; prevBallX = ballX - ballDX, prevBallY = ballY - ballDY
-    ; If prev ball already overlapped barrier on Y axis -> horizontal entry
-    ; Else -> vertical entry
+    ; Compute penetration depths on all 4 sides
+    ; penLeft = (ballX + ballSize) - barX
+    MOV AX, ballX
+    ADD AX, ballSize
+    SUB AX, DI
+    PUSH AX                 ; [SP] = penLeft
+
+    ; penRight = (barX + BRICK_W) - ballX
+    MOV AX, DI
+    ADD AX, BRICK_W
+    SUB AX, ballX
+    PUSH AX                 ; [SP] = penRight
+
+    ; penTop = (ballY + ballSize) - barY
     MOV AX, ballY
-    SUB AX, ballDY          ; AX = prevBallY
-    MOV DX, AX
-    ADD DX, ballSize        ; DX = prevBallY + ballSize
-    ; Check if prevBall Y range overlapped barrier Y range
-    ; overlap if prevBallY < barY+BRICK_H AND prevBallY+ballSize > barY
-    MOV BP, DI
-    ADD BP, BRICK_H         ; BP = barY + BRICK_H
-    CMP AX, BP
-    JGE CBC_BAR_VERT        ; prevBallY >= barBottom -> no Y overlap -> vertical entry
-    CMP DX, DI
-    JLE CBC_BAR_VERT        ; prevBallY+size <= barTop -> no Y overlap -> vertical entry
+    ADD AX, ballSize
+    SUB AX, BP
+    PUSH AX                 ; [SP] = penTop
 
-    ; Horizontal entry: snap X and bounce dx
-    POP AX                  ; AX = barX
-    PUSH AX
-    CMP ballDX, 0
-    JL  CBC_BAR_FROM_RIGHT
-    ; Ball moving right -> snap left of barrier
-    SUB AX, ballSize        ; ballX = barX - ballSize
+    ; penBottom = (barY + BRICK_H) - ballY
+    MOV AX, BP
+    ADD AX, BRICK_H
+    SUB AX, ballY
+    ; AX = penBottom, [SP]=penTop, [SP+2]=penRight, [SP+4]=penLeft
+
+    ; Find minimum penetration: DX = side (0=top,1=bot,2=left,3=right)
+    MOV DX, 1               ; assume bottom
+    POP BX                  ; BX = penTop
+    CMP BX, AX
+    JGE CBC_BAR_CK2
+    MOV AX, BX
+    MOV DX, 0               ; top
+CBC_BAR_CK2:
+    POP BX                  ; BX = penRight
+    CMP BX, AX
+    JGE CBC_BAR_CK3
+    MOV AX, BX
+    MOV DX, 3               ; right
+CBC_BAR_CK3:
+    POP BX                  ; BX = penLeft
+    CMP BX, AX
+    JGE CBC_BAR_APPLY
+    MOV AX, BX
+    MOV DX, 2               ; left
+
+CBC_BAR_APPLY:
+    ; DX=0: hit top face    -> snap ballY above, negate ballDY
+    ; DX=1: hit bottom face -> snap ballY below, negate ballDY
+    ; DX=2: hit left face   -> snap ballX left,  negate ballDX
+    ; DX=3: hit right face  -> snap ballX right,  negate ballDX
+    CMP DX, 0
+    JE  CBC_BAR_SNAP_TOP
+    CMP DX, 1
+    JE  CBC_BAR_SNAP_BOT
+    CMP DX, 2
+    JE  CBC_BAR_SNAP_LEFT
+    ; DX=3: hit right face -> snap ball to right of barrier
+    MOV AX, DI
+    ADD AX, BRICK_W
     MOV ballX, AX
-    JMP CBC_BAR_HBOUNCE
-CBC_BAR_FROM_RIGHT:
-    ADD AX, BRICK_W         ; ballX = barX + BRICK_W
-    MOV ballX, AX
-CBC_BAR_HBOUNCE:
     NEG ballDX
     JMP CBC_BAR_REDRAW
-
-CBC_BAR_VERT:
-    ; Vertical entry: snap Y and bounce dy
-    CMP ballDY, 0
-    JL  CBC_BAR_UP
-    ; Ball moving DOWN -> snap above
+CBC_BAR_SNAP_LEFT:
+    ; Hit left face -> snap ball to left of barrier
     MOV AX, DI
     SUB AX, ballSize
+    MOV ballX, AX
+    NEG ballDX
+    JMP CBC_BAR_REDRAW
+CBC_BAR_SNAP_TOP:
+    ; Hit top face -> snap ball above barrier
+    MOV AX, BP
+    SUB AX, ballSize
     MOV ballY, AX
-    JMP CBC_BAR_VBOUNCE
-CBC_BAR_UP:
-    MOV AX, DI
+    NEG ballDY
+    JMP CBC_BAR_REDRAW
+CBC_BAR_SNAP_BOT:
+    ; Hit bottom face -> snap ball below barrier
+    MOV AX, BP
     ADD AX, BRICK_H
     MOV ballY, AX
-CBC_BAR_VBOUNCE:
     NEG ballDY
 
 CBC_BAR_REDRAW:
     ; Redraw the barrier fully (repair any erase damage)
-    POP AX                  ; AX = barX
-    MOV rectX, AX
-    MOV rectY, DI
+    MOV rectX, DI
+    MOV rectY, BP
     MOV rectW, BRICK_W
     MOV rectH, BRICK_H
     MOV rectColor, 8
     CALL DRAW_RECT
+    POP DI
     POP BP
     JMP CBC_END
 
@@ -3152,6 +3599,7 @@ CHECK_PADDLE_COLLISION PROC
     MOV ballY, AX
 
     CALL SND_PADDLE
+    CALL DRAW_PADDLE
 
     ; --- Curved-paddle reflection (9-zone angular fan) ---
     ; The paddle acts like a CURVED surface: normals fan outward
@@ -3360,11 +3808,11 @@ RW_DONE:
 REPAIR_WALLS ENDP
 
 ;==============================================================
-; REDRAW_BARRIERS_NEAR_BALL — repair any barrier (grey) bricks
-;   damaged by ball/trail erase. Scans bricks in a bounding box
-;   that covers ballX/Y plus all 3 trail positions.
+; REDRAW_BRICKS_NEAR_BALL — repair ANY active bricks (normal
+;   or barrier) damaged by ball/trail erase. Scans bricks in a
+;   bounding box that covers ballX/Y plus all 3 trail positions.
 ;==============================================================
-REDRAW_BARRIERS_NEAR_BALL PROC
+REDRAW_BRICKS_NEAR_BALL PROC
     PUSH AX
     PUSH BX
     PUSH CX
@@ -3442,8 +3890,13 @@ RB_SK_Y2:
 RB_SK_Y2B:
 
     ; Now bbox = [BX..CX+ballSize, DX..SI+ballSize]
+    ; Expand by 2 extra pixels on each side for glow/trail overlap
+    SUB BX, 2
+    SUB DX, 2
     ADD CX, ballSize        ; maxX
+    ADD CX, 2
     ADD SI, ballSize        ; maxY
+    ADD SI, 2
 
     ; Quick reject: if entirely below brick area or above
     CMP SI, 22
@@ -3511,10 +3964,10 @@ RBN_COL:
     IMUL AX, BRICK_COLS
     ADD AX, BP
     MOV SI, AX
-    CMP bricks[SI], 2
-    JNE RBN_SKIP
+    CMP bricks[SI], 0       ; skip only destroyed bricks
+    JE  RBN_SKIP
 
-    ; Redraw barrier brick
+    ; Redraw active brick (type 1 or 2)
     MOV AX, BP
     IMUL AX, 23
     ADD AX, 11
@@ -3525,7 +3978,32 @@ RBN_COL:
     MOV rectY, AX
     MOV rectW, BRICK_W
     MOV rectH, BRICK_H
-    MOV rectColor, 8
+
+    ; Determine color: barrier (type 2) = dark gray, normal = row color
+    CMP bricks[SI], 2
+    JE  RBN_BARRIER_CLR
+    ; Normal brick: row-based color (matching DRAW_BRICKS)
+    CMP DX, 0
+    JE  RBN_C0
+    CMP DX, 1
+    JE  RBN_C1
+    CMP DX, 2
+    JE  RBN_C2
+    CMP DX, 3
+    JE  RBN_C3
+    MOV rectColor, 5        ; row 4: orange
+    JMP RBN_DO_DRAW
+RBN_C0: MOV rectColor, 4    ; row 0: red
+    JMP RBN_DO_DRAW
+RBN_C1: MOV rectColor, 14   ; row 1: yellow
+    JMP RBN_DO_DRAW
+RBN_C2: MOV rectColor, 2    ; row 2: green
+    JMP RBN_DO_DRAW
+RBN_C3: MOV rectColor, 3    ; row 3: cyan
+    JMP RBN_DO_DRAW
+RBN_BARRIER_CLR:
+    MOV rectColor, 8        ; barrier: dark gray
+RBN_DO_DRAW:
     CALL DRAW_RECT
 
 RBN_SKIP:
@@ -3546,7 +4024,7 @@ RBN_DONE:
     POP BX
     POP AX
     RET
-REDRAW_BARRIERS_NEAR_BALL ENDP
+REDRAW_BRICKS_NEAR_BALL ENDP
 
 ;==============================================================
 ; MOVE_BALL
@@ -3558,7 +4036,8 @@ MOVE_BALL PROC
     CALL UPDATE_TRAIL
     CALL ERASE_BALL
     CALL REPAIR_WALLS
-    CALL REDRAW_BARRIERS_NEAR_BALL
+    CALL REDRAW_BRICKS_NEAR_BALL
+    CALL DRAW_PADDLE
 
     MOV AX, ballX
     ADD AX, ballDX
@@ -3835,7 +4314,7 @@ DRAW_GAME_FRAME ENDP
 ;==============================================================
 SHOW_GAME_SCREEN PROC
     CALL INIT_GAME
-    CALL SETUP_LEVEL
+   CALL SETUP_LEVEL
     CALL DRAW_GAME_FRAME
 
     ; Brief pause before ball starts moving
@@ -3913,57 +4392,53 @@ SHOW_GAME_OVER PROC
     ; Save score to high score table
     CALL INSERT_HIGH_SCORE
 
-    ; --- Black background ---
+    ; --- Background ---
     MOV AL, 0
     CALL CLEAR_SCREEN
 
     ;----------------------------------------------------------
-    ; HEADER BAR (red, like Iteration 1 colored headers)
+    ; HEADER BAR
     ;----------------------------------------------------------
     MOV rectX, 0
     MOV rectY, 0
     MOV rectW, 320
     MOV rectH, 22
-    MOV rectColor, 4              ; red
+    MOV rectColor, 1              ; secondary background
     CALL DRAW_RECT
 
-    ; Header underline (light red)
+    ; Header underline
     MOV rectX, 0
     MOV rectY, 22
     MOV rectW, 320
     MOV rectH, 1
-    MOV rectColor, 12
+    MOV rectColor, 8              ; slate border
     CALL DRAW_RECT
 
-   ; Title "GAME OVER" centered.
-    ; Width: G A M E (sp) O V E R = 8 letters * 9 + 6 = 78
-    ; X = (320 - 78)/2 = 121
+    ; Title "GAME OVER" centered
     MOV SI, OFFSET sGameOver
     MOV BX, 121
     MOV CX, 7
-    MOV DL, 15                    ; white on red header
+    MOV DL, 14                    ; golden yellow title
     CALL DRAW_STRING
 
     ;----------------------------------------------------------
-    ; INFO BOX (bordered rectangle that holds the entries)
-    ; Outer:  X=30, Y=45, W=260, H=110  (white border)
-    ; Inner:  X=31, Y=46, W=258, H=108  (black fill)
+    ; INFO BOX
     ;----------------------------------------------------------
     MOV rectX, 30
     MOV rectY, 45
     MOV rectW, 260
     MOV rectH, 110
-    MOV rectColor, 15
+    MOV rectColor, 8              ; slate border
     CALL DRAW_RECT_BORDER
 
     MOV rectX, 32
     MOV rectY, 47
     MOV rectW, 256
     MOV rectH, 106
-    MOV rectColor, 0
+    MOV rectColor, 13             ; buttons background fill
     CALL DRAW_RECT
 
-    ; Optional inner accent line under top of box
+    ; Inner accent line under top of box
     MOV rectX, 32
     MOV rectY, 67
     MOV rectW, 256
@@ -3973,10 +4448,6 @@ SHOW_GAME_OVER PROC
 
     ;----------------------------------------------------------
     ; LINE A (Y=53): "PLAYER: <name>" — Yellow
-    ;   prefix actual width:
-    ;     P L A Y E R :  -> 7 letters * 9 = 63
-    ;     + 1 space      -> + 6           = 69
-    ;   total width = 69 + nameLen*9
     ;----------------------------------------------------------
     MOV AL, nameLen
     MOV AH, 0
@@ -4008,8 +4479,7 @@ GO_PNAME:
 GO_PNAME_DN:
 
     ;----------------------------------------------------------
-    ; LINE B (Y=85): "LEVEL: <n>" — Light Blue
-    ; "LEVEL: " = 6 chars * 9 + 1 space * 6 = 60 px
+    ; LINE B (Y=85): "LEVEL: <n>" — Neon Cyan
     ;----------------------------------------------------------
     MOV SI, OFFSET sGoLevel
     MOV BX, 125
@@ -4028,7 +4498,7 @@ GO_PNAME_DN:
     CALL DRAW_STRING
 
     ;----------------------------------------------------------
-    ; LINE C (Y=120): "FINAL SCORE: <score>" — Light Green
+    ; LINE C (Y=120): "FINAL SCORE: <score>" — Neon Green
     ;----------------------------------------------------------
     MOV AX, score
     CALL ITOA
@@ -4054,6 +4524,15 @@ GO_PNAME_DN:
     ;----------------------------------------------------------
     ; FOOTER BAR
     ;----------------------------------------------------------
+    ; Top border line
+    MOV rectX, 0
+    MOV rectY, 177
+    MOV rectW, 320
+    MOV rectH, 1
+    MOV rectColor, 8
+    CALL DRAW_RECT
+
+    ; Footer background
     MOV rectX, 0
     MOV rectY, 178
     MOV rectW, 320
@@ -4069,7 +4548,7 @@ GO_BLINK:
     MOV SI, OFFSET sGoEnter
     MOV BX, 40
     MOV CX, 186
-    MOV DL, 7
+    MOV DL, 9                     ; Neon Cyan text
     CALL DRAW_STRING
 
     ; ON delay
@@ -4087,8 +4566,7 @@ GO_BLINK:
     JMP GO_BLINK
 
 GO_DO_ERASE:
-    ; --- ERASE the WHOLE prompt line so blink is uniform ---
-    ; Width 280, height 14 covers all 8 font rows + safety
+    ; --- ERASE prompt line ---
     MOV rectX, 20
     MOV rectY, 184
     MOV rectW, 280
@@ -4133,12 +4611,14 @@ SHOW_LEVEL_CLEAR PROC
     MOV AL, 0
     CALL CLEAR_SCREEN
 
-    ; Header bar (green for success)
+    ;----------------------------------------------------------
+    ; HEADER BAR
+    ;----------------------------------------------------------
     MOV rectX, 0
     MOV rectY, 0
     MOV rectW, 320
     MOV rectH, 22
-    MOV rectColor, 2
+    MOV rectColor, 1              ; secondary background
     CALL DRAW_RECT
 
     ; Header underline
@@ -4146,33 +4626,34 @@ SHOW_LEVEL_CLEAR PROC
     MOV rectY, 22
     MOV rectW, 320
     MOV rectH, 1
-    MOV rectColor, 10
+    MOV rectColor, 8              ; slate border
     CALL DRAW_RECT
 
-    ; Title "LEVEL COMPLETE!"
-    ; 14 letters + 0 spaces = 14*9 = 126 px. X=(320-126)/2=97
+    ; Title "LEVEL COMPLETE!" centered
     MOV SI, OFFSET sGameWin
     MOV BX, 97
     MOV CX, 7
-    MOV DL, 15
+    MOV DL, 14                    ; golden yellow title
     CALL DRAW_STRING
 
-    ; Info box
+    ;----------------------------------------------------------
+    ; INFO BOX
+    ;----------------------------------------------------------
     MOV rectX, 30
     MOV rectY, 45
     MOV rectW, 260
     MOV rectH, 100
-    MOV rectColor, 15
+    MOV rectColor, 8              ; slate border
     CALL DRAW_RECT_BORDER
 
     MOV rectX, 32
     MOV rectY, 47
     MOV rectW, 256
     MOV rectH, 96
-    MOV rectColor, 0
+    MOV rectColor, 13             ; buttons background fill
     CALL DRAW_RECT
 
-    ; "LEVEL: <n>" at Y=60
+    ; "LEVEL: <n>" at Y=60 (Neon Cyan)
     MOV SI, OFFSET sGoLevel
     MOV BX, 115
     MOV CX, 60
@@ -4192,7 +4673,7 @@ SHOW_LEVEL_CLEAR PROC
     MOV SI, OFFSET sScore
     MOV BX, 115
     MOV CX, 85
-    MOV DL, 14
+    MOV DL, 14                    ; golden yellow
     CALL DRAW_STRING
 
     MOV AX, score
@@ -4200,14 +4681,14 @@ SHOW_LEVEL_CLEAR PROC
     MOV SI, OFFSET itoaBuf
     MOV BX, 175
     MOV CX, 85
-    MOV DL, 15
+    MOV DL, 15                    ; white
     CALL DRAW_STRING
 
     ; "Lives: <n>" at Y=105
     MOV SI, OFFSET sLives
     MOV BX, 115
     MOV CX, 105
-    MOV DL, 14
+    MOV DL, 14                    ; golden yellow
     CALL DRAW_STRING
 
     MOV AL, lives
@@ -4216,10 +4697,21 @@ SHOW_LEVEL_CLEAR PROC
     MOV SI, OFFSET itoaBuf
     MOV BX, 175
     MOV CX, 105
-    MOV DL, 10
+    MOV DL, 10                    ; neon green
     CALL DRAW_STRING
 
-    ; Footer bar
+    ;----------------------------------------------------------
+    ; FOOTER BAR
+    ;----------------------------------------------------------
+    ; Top border line
+    MOV rectX, 0
+    MOV rectY, 177
+    MOV rectW, 320
+    MOV rectH, 1
+    MOV rectColor, 8
+    CALL DRAW_RECT
+
+    ; Footer background
     MOV rectX, 0
     MOV rectY, 178
     MOV rectW, 320
@@ -4232,7 +4724,7 @@ SLC_BLINK:
     MOV SI, OFFSET sNextLvl
     MOV BX, 44
     MOV CX, 186
-    MOV DL, 15
+    MOV DL, 9                     ; Neon Cyan text
     CALL DRAW_STRING
 
     MOV CX, 10
@@ -4252,7 +4744,7 @@ SLC_ERASE:
     MOV rectY, 184
     MOV rectW, 280
     MOV rectH, 14
-    MOV rectColor, 1
+    MOV rectColor, 1              ; same as footer bg
     CALL DRAW_RECT
 
     MOV CX, 7
@@ -4292,42 +4784,46 @@ SHOW_FINAL_WIN PROC
     MOV AL, 0
     CALL CLEAR_SCREEN
 
-    ; Header bar (green for victory)
+    ;----------------------------------------------------------
+    ; HEADER BAR
+    ;----------------------------------------------------------
     MOV rectX, 0
     MOV rectY, 0
     MOV rectW, 320
     MOV rectH, 22
-    MOV rectColor, 2
+    MOV rectColor, 1              ; secondary background
     CALL DRAW_RECT
 
+    ; Header underline
     MOV rectX, 0
     MOV rectY, 22
     MOV rectW, 320
     MOV rectH, 1
-    MOV rectColor, 10
+    MOV rectColor, 8              ; slate border
     CALL DRAW_RECT
 
-    ; Title "CONGRATULATIONS!"
-    ; 16 letters * 9 = 144 px. X=(320-144)/2=88
+    ; Title "CONGRATULATIONS!" centered
     MOV SI, OFFSET sCongrats
     MOV BX, 88
     MOV CX, 7
-    MOV DL, 15
+    MOV DL, 14                    ; golden yellow title
     CALL DRAW_STRING
 
-    ; Info box
+    ;----------------------------------------------------------
+    ; INFO BOX
+    ;----------------------------------------------------------
     MOV rectX, 30
     MOV rectY, 45
     MOV rectW, 260
     MOV rectH, 110
-    MOV rectColor, 15
+    MOV rectColor, 8              ; slate border
     CALL DRAW_RECT_BORDER
 
     MOV rectX, 32
     MOV rectY, 47
     MOV rectW, 256
     MOV rectH, 106
-    MOV rectColor, 0
+    MOV rectColor, 13             ; buttons background fill
     CALL DRAW_RECT
 
     ; Accent line
@@ -4338,8 +4834,7 @@ SHOW_FINAL_WIN PROC
     MOV rectColor, 8
     CALL DRAW_RECT
 
-    ; "ALL LEVELS COMPLETE!" at Y=53
-    ; 18 letters + 2 spaces = 18*9 + 2*6 = 174 px. X=(320-174)/2=73
+    ; "ALL LEVELS COMPLETE!" at Y=53 (Neon Green)
     MOV SI, OFFSET sFinalWin
     MOV BX, 73
     MOV CX, 53
@@ -4359,7 +4854,7 @@ SHOW_FINAL_WIN PROC
     MOV SI, OFFSET sGoPlayer
     MOV BX, AX
     MOV CX, 80
-    MOV DL, 14
+    MOV DL, 14                    ; golden yellow
     CALL DRAW_STRING
 
     ADD BX, 69
@@ -4379,7 +4874,7 @@ FW_PNAME_DN:
     MOV SI, OFFSET sGoLevel
     MOV BX, 125
     MOV CX, 100
-    MOV DL, 9
+    MOV DL, 9                     ; neon cyan
     CALL DRAW_STRING
 
     MOV AL, level
@@ -4405,7 +4900,7 @@ FW_PNAME_DN:
 
     MOV SI, OFFSET sGoFinal
     MOV CX, 120
-    MOV DL, 10
+    MOV DL, 10                    ; neon green
     CALL DRAW_STRING
 
     ADD BX, 111
@@ -4413,7 +4908,18 @@ FW_PNAME_DN:
     MOV DL, 10
     CALL DRAW_STRING
 
-    ; Footer bar
+    ;----------------------------------------------------------
+    ; FOOTER BAR
+    ;----------------------------------------------------------
+    ; Top border line
+    MOV rectX, 0
+    MOV rectY, 177
+    MOV rectW, 320
+    MOV rectH, 1
+    MOV rectColor, 8
+    CALL DRAW_RECT
+
+    ; Footer background
     MOV rectX, 0
     MOV rectY, 178
     MOV rectW, 320
@@ -4421,12 +4927,12 @@ FW_PNAME_DN:
     MOV rectColor, 1
     CALL DRAW_RECT
 
-    ; Blinking "PRESS ENTER TO RETURN TO MENU"
+    ; Blinking prompt inside footer
 FW_BLINK:
     MOV SI, OFFSET sGoEnter
     MOV BX, 40
     MOV CX, 186
-    MOV DL, 7
+    MOV DL, 9                     ; Neon Cyan prompt
     CALL DRAW_STRING
 
     MOV CX, 10
@@ -4446,7 +4952,7 @@ FW_ERASE:
     MOV rectY, 184
     MOV rectW, 280
     MOV rectH, 14
-    MOV rectColor, 1
+    MOV rectColor, 1              ; same as footer bg
     CALL DRAW_RECT
 
     MOV CX, 7
